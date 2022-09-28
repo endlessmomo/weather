@@ -1,0 +1,12 @@
+JPA (Java Persistent API) -> ORM (Object Relation Mapping)
+    - ORM 중 하나
+
+    Application Modules --> O/R Mapper --> JDBC Interfaces --> JDBC Implementations --> Persistence Layer
+
+
+JDBC (Java Database Connectivity) -> SQL Mapper
+    - SQL Mapper 중 하나
+
+    Application --> JDBC Interface --> JDBC Implementations --> Persistence Layer
+        DAO     -->   Spring JDBC  -->      JDBC Driver     -->     Database
+

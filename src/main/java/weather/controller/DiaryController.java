@@ -39,4 +39,12 @@ public class DiaryController {
     ) {
         return diaryService.readDiares(startDate, endDate);
     }
+
+    @PutMapping("/update/diary")
+    void upDateDiary(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+            @RequestBody String text
+    ) {
+        diaryService.updateDiary(date, text);
+    }
 }

@@ -44,7 +44,7 @@ public class DiaryService {
         Diary nowDiary = new Diary();
         nowDiary.setWeather(parseWeather.get("main").toString());
         nowDiary.setIcon(parseWeather.get("icon").toString());
-        nowDiary.setTemperature((Double)parseWeather.get("temp"));
+        nowDiary.setTemperature((Double) parseWeather.get("temp"));
         nowDiary.setText(text);
         nowDiary.setDate(date);
 
@@ -52,11 +52,18 @@ public class DiaryService {
     }
 
     public List <Diary> readDiary(LocalDate date) {
-       return diaryRepository.findAllByDate(date);
+        return diaryRepository.findAllByDate(date);
     }
 
-    public List<Diary> readDiares(LocalDate startDate, LocalDate endDate) {
+    public List <Diary> readDiares(LocalDate startDate, LocalDate endDate) {
         return diaryRepository.findAllByDateBetween(startDate, endDate);
+    }
+
+    public void updateDiary(LocalDate date, String text) {
+        Diary nowDiary = diaryRepository.getFirstByDate(date);
+        nowDiary.setText(text);
+
+        diaryRepository.save(nowDiary);
     }
 
     private String getWeatherString() {
@@ -110,5 +117,4 @@ public class DiaryService {
         return resultMap;
 
     }
-
 }

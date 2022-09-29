@@ -6,8 +6,13 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
+import weather.domain.DateWeather;
 import weather.domain.Diary;
+import weather.repository.DateWeatherRepository;
 import weather.repository.DiaryRepository;
 
 import java.io.BufferedReader;
@@ -24,37 +29,64 @@ import java.util.Map;
 public class DiaryService {
 
     private final DiaryRepository diaryRepository;
-
+    private final DateWeatherRepository dateWeatherRepository;
     /*
      * open weather map에서 데이터 받아오기
      * 받아온 날씨 데이터 파싱하기
      * 우리 db에 저장하기
      * */
+    @Transactional
+    @Scheduled(cron = "0 0 1 * * *")
+    public void saveWeatherDate(){
+        dateWeatherRepository.save(getWeatherFromApi());
+    }
     @Value("${openweathermap.key}")
     private String apiKey;
-
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     public void createDiary(LocalDate date, String text) {
+        // 날씨 데이터 가져오기 ( DB or APi에서 )
+        DateWeather dateWeather = getDateWeather(date);
+
+        // 우리 db에 저장
+        Diary nowDiary = new Diary();
+        nowDiary.setDateWeather(dateWeather);
+        nowDiary.setText(text);
+        diaryRepository.save(nowDiary);
+    }
+    private DateWeather getWeatherFromApi(){
         // #1
         String weatherData = getWeatherString();
 
         // #2
-        Map <String,Object> parseWeather = parseWeather(weatherData);
+        Map <String,Object> parsedWeather = parsedWeather(weatherData);
 
-        // #3
-        Diary nowDiary = new Diary();
-        nowDiary.setWeather(parseWeather.get("main").toString());
-        nowDiary.setIcon(parseWeather.get("icon").toString());
-        nowDiary.setTemperature((Double) parseWeather.get("temp"));
-        nowDiary.setText(text);
-        nowDiary.setDate(date);
+        DateWeather dateWeather = new DateWeather();
+        dateWeather.setDate(LocalDate.now());
+        dateWeather.setWeather(parsedWeather.get("main").toString());
+        dateWeather.setIcon(parsedWeather.get("icon").toString());
+        dateWeather.setTemperature((Double)parsedWeather.get("temp"));
 
-        diaryRepository.save(nowDiary);
+        return dateWeather;
     }
+    private DateWeather getDateWeather(LocalDate date){
+        List<DateWeather> dateWeatherListFromDB =
+                dateWeatherRepository.findAllByDate(date);
 
+        if(dateWeatherListFromDB.size() == 0){
+            // api에 현재 날씨 정보 가져와야한다.
+            // 현재 날씨를 가져오도록 하거나 날씨없이 일기를 쓰도록
+
+            return getWeatherFromApi();
+        } else {
+            return dateWeatherListFromDB.get(0);
+        }
+
+    }
+    @Transactional(readOnly = true)
     public List <Diary> readDiary(LocalDate date) {
         return diaryRepository.findAllByDate(date);
     }
-
+    @Transactional(readOnly = true)
     public List <Diary> readDiares(LocalDate startDate, LocalDate endDate) {
         return diaryRepository.findAllByDateBetween(startDate, endDate);
     }
@@ -64,6 +96,10 @@ public class DiaryService {
         nowDiary.setText(text);
 
         diaryRepository.save(nowDiary);
+    }
+
+    public void deleteDiary(LocalDate date) {
+        diaryRepository.deleteAllByDate(date);
     }
 
     private String getWeatherString() {
@@ -96,7 +132,7 @@ public class DiaryService {
         }
     }
 
-    private Map <String,Object> parseWeather(String jsonString) {
+    private Map <String,Object> parsedWeather(String jsonString) {
         JSONParser jsonParser = new JSONParser();
         JSONObject jsonObject;
 

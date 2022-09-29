@@ -36,3 +36,6 @@ application-aws.properties
 
 ### VS Code ###
 .vscode/
+
+logs
+개발공부/

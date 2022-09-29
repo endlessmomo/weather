@@ -1,0 +1,53 @@
+트랜잭션(Transaction)
+  - 데이터베이스의 상태를 변화시키기 위해 수행하는 작업 단위
+
+  - 작업단위
+    트랜잭션 : 오늘 일기 작성하기
+        1. 오늘 날씨 데이터를 가져와서
+        2. 일기를 DB에 저장하
+
+여러 트랜잭션이 경쟁하면 생기는 문제
+
+1번 문제 예 :
+트랜잭션 A : Diary 테이블의 3번째 row 수정중
+트랜잭션 B : Diary 테이블의 3번째 row 조회하려 한다.
+
+발생할 수 있는 문제
+Dirty Read
+
+2번 문제 예
+트랜잭션A:Diary 테이블의 3번쨰 row 조회 * 2
+트랜잭션B:Diary 테이블의 3번째 row 수정 후 커밋
+
+발생할 수 있는 문제
+Non-Repetable Read -> 일관성 지키지 못함, 특정 값을 두 트랜잭션이 경쟁할 떄
+
+3번 문제 예
+트랜잭션A:Diary 테이블의 0~4번쨰 row 조회 * 2
+트랜잭션B:Diary 테이블의 3번째 row 수정 후 커밋
+
+Phantom Read : 일관성 침해, 특정 범위 내에 두 트랜잭션이 경쟁 할 때
+
+@Transactional
+
+클래스, 메서드 위에 어노테이션을 추가가능하다.
+트랜잭션이 기능이 적요된 프록시 객체를 생성
+(Platform Transaction Manager)
+
+Spring 트랜잭션의 세부 설정들
+1. Isolation(격리수준) : 트랜잭션에서 일관성이 없는 데이터를 허용하는 수준
+    - Default
+    - READ_UNCOMMITTED (Dirty Read 발생)
+    - READ_COMMITTED   (Dirty Read 방지)
+    - REPEATABLE_READ  (Non-Repeatable Read 방지)
+    - SERIALIZABLE     (Phantom Read 방지)
+
+2. Propagation(전파수준) : 트랜잭션 동작 도중 다른 트랜잭션을 호출하는 상황
+    - Required
+    - Supports
+    - Required_new
+    - Nested
+    - ...
+3. ReadOnly
+4. 트랜잭션 롤백 예외
+5. timeout 속성

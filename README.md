@@ -2,12 +2,13 @@
 날씨 데이터를 Open API를 매일 자정 12:00 스케쥴 통해서 해당 날씨에 대한 정보를 가져와 저장하고 일기를 기록할 수 있는 프로젝트입니다.
 
 ### 💻 사용기술 및 개발환경
+
 개발 환경
-운영체제 : mac M1
-IDE : Intelli J
-JDK : Open JDK 1.8
-Spring Boot : 2.7.3
-Database : Mysql, H2(testDB)
+- 운영체제 : mac M1
+- IDE : Intelli J
+- JDK : Open JDK 1.8
+- Spring Boot : 2.7.3
+- Database : Mysql, H2(testDB)
 
 BE
 - Spring Boot, Spring Data Jpa
